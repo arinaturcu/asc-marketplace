@@ -39,19 +39,24 @@ class Consumer(Thread):
         self.retry_wait_time = retry_wait_time
         self.cart_ids = []
 
+		# generate an id for each existing cart
         for _ in carts:
             self.cart_ids.append(marketplace.new_cart())
 
     def run(self):
         for (cart_id, cart) in zip(self.cart_ids, self.carts):
             for action in cart:
+				# add or remove the product for <quantity> times
                 for _ in range(action['quantity']):
                     if action['type'] == 'add':
+						# try untill the product becomes available
                         while not self.marketplace.add_to_cart(cart_id, action['product']):
                             sleep(self.retry_wait_time)
                     if action['type'] == 'remove':
                         self.marketplace.remove_from_cart(cart_id, action['product'])
 
+			# take the products and the print_lock to print what
+			# the customer bought without tangling the messages
             products = self.marketplace.place_order(cart_id)
             print_lock = self.marketplace.get_print_lock()
 

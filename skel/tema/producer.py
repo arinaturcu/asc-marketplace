@@ -44,6 +44,9 @@ class Producer(Thread):
         while True:
             for product in self.products:
                 for _ in range(product[1]):
+                    # try to publish
+                    # if the queue limit is reached, wait and try again,
+                    # maybe a customer will buy something in the meanwhile
                     while not self.marketplace.publish(self.producer_id, product[0]):
                         sleep(product[2])
 
