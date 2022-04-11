@@ -6,7 +6,7 @@ Assignment 1
 March 2021
 """
 
-from threading import Lock, Thread
+from threading import Thread
 from time import sleep
 
 
@@ -45,7 +45,6 @@ class Consumer(Thread):
     def run(self):
         for (cart_id, cart) in zip(self.cart_ids, self.carts):
             for action in cart:
-                # if action['type'] == 'add':
                 for _ in range(action['quantity']):
                     if action['type'] == 'add':
                         while not self.marketplace.add_to_cart(cart_id, action['product']):
@@ -53,7 +52,9 @@ class Consumer(Thread):
                     if action['type'] == 'remove':
                         self.marketplace.remove_from_cart(cart_id, action['product'])
 
-            products, print_lock = self.marketplace.place_order(cart_id)
+            products = self.marketplace.place_order(cart_id)
+            print_lock = self.marketplace.get_print_lock()
+
             with print_lock:
                 for product in products:
                     print(self.name + ' bought', product)
